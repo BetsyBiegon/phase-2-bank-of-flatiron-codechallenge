@@ -1,13 +1,14 @@
-// src/components/Transaction.js
 import React from "react";
 
-function Transaction({ transaction }) {
+function Transaction({transaction: {id, date, category, amount, description}, delTransaction,}) {
+  
   return (
     <tr>
-      <td>{transaction.date}</td>
-      <td>{transaction.description}</td>
-      <td>{transaction.category}</td>
-      <td>{transaction.amount}</td>
+      <td>{date}</td>
+      <td>{description}</td>
+      <td>{category}</td>
+      <td>{amount}</td>
+      <td><button onClick={()=>delTransaction(id)}>Delete</button></td>
     </tr>
   );
 }

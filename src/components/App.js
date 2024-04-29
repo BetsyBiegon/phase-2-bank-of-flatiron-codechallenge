@@ -1,37 +1,63 @@
-import React, { useEffect, useState } from 'react';
-import TransactionList from './TransactionList';
-import TransactionForm from './TransactionForm';
+import React from "react";
+import AccountContainer from "./AccountContainer";
 
-const App = () => {
-  const [transactions, setTransactions] = useState([]);
-  
-  useEffect(() => {
-    fetch('http://localhost:8001/transactions')
-      .then(response => response.json())
-      .then(data => setTransactions(data));
-  }, []);
+async function getTransactions() {
+  try {
+    const response = await fetch('http://localhost:8001/transactions');
+    const jsonResponse = await response.json();
+    return jsonResponse;
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-  const handleFormSubmit = formData => {
-    fetch('http://localhost:8001/transactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(newTransaction => {
-      setTransactions([...transactions, newTransaction]);
-    });
+function App() {
+  const [transactions, setTransactions] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const fetchedTransactions = await getTransactions();
+      setTransactions(fetchedTransactions);
+    };
+
+    fetchData();  // Call the fetchData function inside useEffect
+  }, []); // Empty dependency array means this effect runs only once after the initial render
+
+  const handleAddTransaction = (transaction) => {
+    setTransactions([...transactions, transaction]);
+  };
+
+  const handleDelTransaction = (transactionID) => {
+    const filterTrans = transactions.filter(
+      (trans) => trans.id !== transactionID
+    );
+    setTransactions(filterTrans);
+  };
+
+  const handleSearch = (searchTerm) => {
+    if (searchTerm) {
+      const filterTrans = transactions.filter(
+        (trans) => trans.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setTransactions(filterTrans);
+    } else {
+      getTransactions(); // Use the getTransactions function defined outside useEffect
+    }
   };
 
   return (
-    <div className="ui container">
-      <h1>Bank of Flatiron</h1>
-      <TransactionForm onSubmit={handleFormSubmit} />
-      <TransactionList transactions={transactions} />
+    <div className="ui raised segment">
+      <div className="ui segment violet inverted">
+        <h2>The Royal Bank of Flatiron</h2>
+      </div>
+      <AccountContainer 
+        handleAddTransaction={handleAddTransaction}
+        transactions={transactions}
+        handleSearch={handleSearch}
+        handleDelTransaction={handleDelTransaction}
+      />
     </div>
   );
-};
+}
 
 export default App;

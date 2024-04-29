@@ -1,26 +1,18 @@
-// src/components/TransactionsList.js
-import React, { useState, useEffect } from "react";
+// src/components/transactionslist.js
+import React from "react";
 import Transaction from "./Transaction";
 
-function TransactionsList() {
-  const [transactions, setTransactions] = useState([]);
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:8001/transactions")
-      .then((response) => response.json())
-      .then((data) => {
-        setTransactions(data);
-        setFilteredTransactions(data);
-      });
-  }, []);
-
-  const handleSearch = (searchTerm) => {
-    const filtered = transactions.filter((transaction) =>
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredTransactions(filtered);
-  };
+function TransactionsList({ handleDelTransaction, transactions }) {
+  //deleting a transaction
+  const delTransaction = async function (transactionID) {
+    console.log(transactionID);
+    try{
+      await fetch('http://localhost:8001/transactions/' + transactionID, {method: 'DELETE'});
+      handleDelTransaction(transactionID);
+    } catch(error) {
+      console.log(error)
+    }
+  }
 
   return (
     <table className="ui celled striped padded table">
@@ -39,8 +31,13 @@ function TransactionsList() {
             <h3 className="ui center aligned header">Amount</h3>
           </th>
         </tr>
-        {filteredTransactions.map((transaction) => (
-          <Transaction key={transaction.id} transaction={transaction} />
+        {/* render a list of <Transaction> components here */}
+        {transactions.map((transaction, idx)=> (
+          <Transaction
+            key={transaction.id}
+            transaction={transaction}
+            delTransaction={delTransaction}
+          />
         ))}
       </tbody>
     </table>
